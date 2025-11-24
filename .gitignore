@@ -6,3 +6,18 @@ diff_rasterization/diff_rast.egg-info
 diff_rasterization/dist
 tensorboard_3d
 screenshots
+
+# Statistical analysis project directories
+data/
+outputs/
+__pycache__/
+*.ply
+*.pth
+*.ckpt
+*.pt
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pkl
+*.pickle
