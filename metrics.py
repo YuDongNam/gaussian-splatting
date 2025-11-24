@@ -49,7 +49,7 @@ def evaluate(model_paths):
             full_dict_polytopeonly[scene_dir] = {}
             per_view_dict_polytopeonly[scene_dir] = {}
 
-            test_dir = Path(scene_dir) / "test"
+            test_dir = Path(scene_dir) / "train"
 
             for method in os.listdir(test_dir):
                 print("Method:", method)
@@ -63,7 +63,9 @@ def evaluate(model_paths):
                 gt_dir = method_dir/ "gt"
                 renders_dir = method_dir / "renders"
                 renders, gts, image_names = readImages(renders_dir, gt_dir)
-
+                if len(renders) == 0:
+                    print(f"Warning: No images found in {renders_dir}. Skipping metrics.")
+                    continue
                 ssims = []
                 psnrs = []
                 lpipss = []
