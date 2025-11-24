@@ -175,7 +175,10 @@ def load_gaussians(ckpt_path: Path, max_sh_degree: int = 3) -> Gaussians:
     rotation = torch.nn.functional.normalize(rots_raw_tensor, dim=1)
     
     # Concatenate features: DC + rest
-    features = torch.cat((features_dc_tensor, features_extra_tensor), dim=2)
+    # After transpose: features_dc_tensor is (N, 1, 3), features_extra_tensor is (N, SH_coeffs-1, 3)
+    # Concatenate along dim=1 to get (N, SH_coeffs, 3)
+    # This matches GaussianModel.get_features() which uses dim=1
+    features = torch.cat((features_dc_tensor, features_extra_tensor), dim=1)
     
     return Gaussians(
         xyz=xyz_tensor,
@@ -299,10 +302,15 @@ def accumulate_alpha(
     rotations = gs.rotation
     
     # Use SH features (not precomputed colors)
-    shs = gs.features.transpose(1, 2).contiguous()  # (N, 3, SH_coeffs)
+    # gs.features is (N, SH_coeffs, 3) after concat: (N, 16, 3) for SH degree 3
+    # Rasterizer expects (N, SH_coeffs, 3) format when separate_sh=False
+    # Use features directly (same as gaussian_renderer when separate_sh=False)
+    shs = gs.features.contiguous()  # (N, SH_coeffs, 3)
     
     try:
         # Forward pass through rasterizer
+        # Note: GaussianRasterizer.forward() does not accept 'dc' parameter
+        # It only accepts 'shs' parameter with all SH coefficients concatenated
         rendered_image, radii, depth_image = rasterizer(
             means3D=means3D,
             means2D=means2D,
