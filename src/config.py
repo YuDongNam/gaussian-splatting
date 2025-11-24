@@ -47,4 +47,10 @@ class CFG:
             self.output_path = Path("outputs")
         else:
             self.output_path = Path(self.output_path)
+        
+        # Ensure directories exist (create if they don't)
+        self.data_path.mkdir(parents=True, exist_ok=True)
+        self.ckpts_path.mkdir(parents=True, exist_ok=True)
+        self.tables_path.mkdir(parents=True, exist_ok=True)
+        self.output_path.mkdir(parents=True, exist_ok=True)
 
